@@ -134,6 +134,88 @@
             flex-shrink: 0;
         }
 
+        /* Drag-to-reorder handle */
+        .drag-handle {
+            background: rgba(255, 255, 255, 0.18);
+            border: none;
+            color: rgba(255, 255, 255, 0.75);
+            cursor: grab;
+            border-radius: 8px;
+            padding: 4px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+            touch-action: none;
+        }
+        .drag-handle svg { display: block; }
+        .drag-handle:hover {
+            background: rgba(255, 255, 255, 0.32);
+            color: white;
+            transform: scale(1.05);
+        }
+        .drag-handle:active { cursor: grabbing; }
+        .section-custom .drag-handle {
+            background: rgba(0,0,0,0.06);
+            color: var(--cat-ink, #1a1a1a);
+            opacity: 0.55;
+        }
+        .section-custom .drag-handle:hover {
+            background: rgba(0,0,0,0.12);
+            opacity: 1;
+        }
+        section[data-section-id] {
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+        section.section-dragging {
+            opacity: 0.35;
+            transform: scale(0.985);
+        }
+
+        /* Lock state hides editing affordances */
+        body.locked .drag-handle,
+        body.locked .add-tile,
+        body.locked .section-delete,
+        body.locked .custom-delete,
+        body.locked #addSectionBtn {
+            display: none !important;
+        }
+
+        /* Lock toggle in settings */
+        #lockToggleBtn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            color: #4b5563;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        #lockToggleBtn:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+        #lockToggleBtn.locked {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        #lockToggleBtn.locked:hover {
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+        }
+        #lockToggleBtn .lock-icon { font-size: 1.1rem; }
+
         /* Category Colors - Widgit-inspired pastels */
         .category-instruments {
             background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
@@ -168,6 +250,22 @@
         .category-rhymes {
             background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
             color: #4c1d95;
+        }
+
+        .category-turntaking {
+            background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
+            color: #854d0e;
+        }
+
+        .btn-turntaking {
+            background-color: #fffbeb;
+            color: #854d0e;
+            border-color: #fcd34d;
+        }
+
+        .btn-turntaking:hover {
+            background-color: #fef3c7;
+            border-color: #f59e0b;
         }
 
         /* Button colors matching categories */
@@ -281,14 +379,69 @@
             color: white;
         }
 
-        #clearBtn {
+        #backspaceBtn {
             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
             color: white;
+            padding: 0.95rem 2rem;
+            font-size: 1.125rem;
         }
 
         #stopBtn {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
+        }
+
+        #clearBtn {
+            background: white;
+            color: #b91c1c;
+            border: 2px solid #fecaca;
+            padding: 0.55rem 1.1rem;
+            font-size: 0.875rem;
+            box-shadow: none;
+            margin-left: 1.5rem;
+            opacity: 0.85;
+        }
+
+        #clearBtn:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            opacity: 1;
+        }
+
+        #clearBtn.arming {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+            opacity: 1;
+            animation: clearPulse 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes clearPulse {
+            from { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            to   { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+
+        .clear-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1f2937;
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 100;
+            font-size: 0.95rem;
+        }
+
+        .clear-toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         .section {
@@ -739,6 +892,16 @@
                         <button class="profile-btn" data-profile="medium">📲 Medium</button>
                         <button class="profile-btn" data-profile="large">🖥️ Large</button>
                     </div>
+                    <label class="block text-sm font-bold text-gray-700 mt-5 mb-3 uppercase tracking-wider">
+                        Edit Mode:
+                    </label>
+                    <div class="flex gap-3 flex-wrap items-center">
+                        <button id="lockToggleBtn" type="button" aria-pressed="false">
+                            <span class="lock-icon">🔓</span>
+                            <span class="lock-label">Unlocked — Tap to lock</span>
+                        </button>
+                        <span class="text-xs text-gray-500" style="max-width: 360px; line-height: 1.35;">When locked, sections can’t be rearranged and new words can’t be added — great for handing the device to a child.</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -762,10 +925,11 @@
                     🎤 Speak
                 </button>
                 <button
-                    id="clearBtn"
+                    id="backspaceBtn"
                     class="action-btn"
+                    aria-label="Remove last word"
                 >
-                    🔄 Clear
+                    ⌫ Backspace
                 </button>
                 <button
                     id="stopBtn"
@@ -773,7 +937,31 @@
                 >
                     ⏹️ Stop
                 </button>
+                <button
+                    id="clearBtn"
+                    class="action-btn"
+                    aria-label="Clear entire sentence"
+                >
+                    Clear all
+                </button>
             </div>
+            <div id="clearToast" class="clear-toast" role="status" aria-live="polite">Clear sentence? Tap again to confirm</div>
+
+            <!-- Turn-taking Section -->
+            <section class="section">
+                <div class="category-header category-turntaking">
+                    <div class="category-icon">
+                        <svg viewBox="0 0 40 40" class="w-full h-full">
+                            <path d="M 8 14 Q 8 8 14 8 L 22 8 Q 28 8 28 14 Q 28 20 22 20 L 18 20 L 13 25 L 13 20 Q 8 20 8 14 Z" fill="currentColor" opacity="0.45"/>
+                            <path d="M 12 26 Q 12 20 18 20 L 26 20 Q 32 20 32 26 Q 32 32 26 32 L 22 32 L 17 37 L 17 32 Q 12 32 12 26 Z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <span>Turn-taking</span>
+                </div>
+                <div id="turntakingGrid" class="grid gap-4">
+                    <!-- Generated by JavaScript -->
+                </div>
+            </section>
 
             <!-- Preferences & Wants Section -->
             <section class="section">
@@ -951,6 +1139,10 @@
         const THIN = 'stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"';
 
         const symbolMap = {
+            // ===== Turn-taking =====
+            'My turn': `<svg viewBox="0 0 64 64"><!-- person silhouette --><circle cx="32" cy="22" r="8" fill="#fcd34d" ${STROKE}/><path d="M 18 50 Q 18 36 32 36 Q 46 36 46 50 L 46 56 L 18 56 Z" fill="#fcd34d" ${STROKE}/><!-- arrow pointing toward the person from the right --><path d="M 58 14 L 44 14" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/><path d="M 48 10 L 42 14 L 48 18" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            'Your turn': `<svg viewBox="0 0 64 64"><!-- two people --><circle cx="22" cy="22" r="8" fill="#fcd34d" ${STROKE}/><path d="M 8 50 Q 8 36 22 36 Q 36 36 36 50 L 36 56 L 8 56 Z" fill="#fcd34d" ${STROKE}/><circle cx="46" cy="22" r="8" fill="#a7f3d0" ${STROKE}/><path d="M 32 50 Q 32 36 46 36 Q 60 36 60 50 L 60 56 L 32 56 Z" fill="#a7f3d0" ${STROKE}/><!-- pointing arrow from left person to right --><path d="M 26 14 L 40 14" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/><path d="M 36 10 L 42 14 L 36 18" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+
             // ===== Instruments =====
             'Piano': `<svg viewBox="0 0 64 64"><rect x="4" y="14" width="56" height="10" rx="2" fill="#7c2d12" ${STROKE}/><rect x="4" y="22" width="56" height="4" fill="#1a1a1a"/><rect x="4" y="26" width="56" height="28" rx="2" fill="#fff" ${STROKE}/><g fill="#1a1a1a"><rect x="10" y="26" width="5" height="16"/><rect x="17" y="26" width="5" height="16"/><rect x="30" y="26" width="5" height="16"/><rect x="37" y="26" width="5" height="16"/><rect x="44" y="26" width="5" height="16"/></g><g stroke="#1a1a1a" stroke-width="1.6"><line x1="12.5" y1="42" x2="12.5" y2="54"/><line x1="19.5" y1="42" x2="19.5" y2="54"/><line x1="27" y1="26" x2="27" y2="54"/><line x1="32.5" y1="42" x2="32.5" y2="54"/><line x1="39.5" y1="42" x2="39.5" y2="54"/><line x1="46.5" y1="42" x2="46.5" y2="54"/><line x1="53" y1="26" x2="53" y2="54"/></g></svg>`,
             'Guitar': `<svg viewBox="0 0 64 64"><rect x="26" y="4" width="12" height="7" rx="1" fill="#fcd34d" ${STROKE}/><circle cx="30" cy="7" r="1" fill="#1a1a1a"/><circle cx="34" cy="7" r="1" fill="#1a1a1a"/><rect x="27" y="11" width="10" height="20" fill="#92400e" ${STROKE}/><g stroke="#1a1a1a" stroke-width="1"><line x1="27" y1="17" x2="37" y2="17"/><line x1="27" y1="23" x2="37" y2="23"/><line x1="27" y1="29" x2="37" y2="29"/></g><path d="M 32 31 C 24 31 18 33 18 38 C 18 42 22 44 22 47 C 22 50 12 52 12 56 C 12 60 22 63 32 63 C 42 63 52 60 52 56 C 52 52 42 50 42 47 C 42 44 46 42 46 38 C 46 33 40 31 32 31 Z" fill="#fbbf24" ${STROKE}/><circle cx="32" cy="52" r="5" fill="#1a1a1a"/><rect x="25" y="59" width="14" height="2.5" rx="0.5" fill="#1a1a1a"/><g stroke="#1a1a1a" stroke-width="0.7" opacity="0.5"><line x1="30" y1="31" x2="30" y2="59"/><line x1="32" y1="31" x2="32" y2="59"/><line x1="34" y1="31" x2="34" y2="59"/></g></svg>`,
@@ -1038,7 +1230,8 @@
             needs: 'Needs',
             emotions: 'Emotions & Feelings',
             control: 'Control',
-            rhymes: 'Songs & Rhymes'
+            rhymes: 'Songs & Rhymes',
+            turntaking: 'Turn-taking'
         };
         const categoryFills = {
             instruments: '#a5b4fc',
@@ -1047,7 +1240,8 @@
             needs:       '#fdba74',
             emotions:    '#c4b5fd',
             control:     '#93c5fd',
-            rhymes:      '#d8b4fe'
+            rhymes:      '#d8b4fe',
+            turntaking:  '#fcd34d'
         };
         const categoryInk = {
             instruments: '#3730a3',
@@ -1056,7 +1250,8 @@
             needs:       '#92400e',
             emotions:    '#5b21b6',
             control:     '#0c2d6b',
-            rhymes:      '#4c1d95'
+            rhymes:      '#4c1d95',
+            turntaking:  '#854d0e'
         };
         function loadCustom() {
             try { return JSON.parse(localStorage.getItem(CUSTOM_KEY)) || {}; }
@@ -1125,6 +1320,7 @@
             const p = CUSTOM_PALETTES[section.paletteIdx] || CUSTOM_PALETTES[0];
             const sectionEl = document.createElement('section');
             sectionEl.className = 'section section-custom';
+            sectionEl.dataset.sectionId = section.id;
             sectionEl.style.setProperty('--cat-bg', p.bg);
             sectionEl.style.setProperty('--cat-bg-light', p.light);
             sectionEl.style.setProperty('--cat-ink', p.ink);
@@ -1176,6 +1372,8 @@
             const host = document.getElementById('customSections');
             if (!host) return;
             host.innerHTML = '';
+            // Remove any previously-hoisted custom sections from <main>
+            document.querySelectorAll('main > section.section-custom').forEach(el => el.remove());
             const sections = loadSections();
             sections.forEach(section => {
                 const dom = buildCustomSectionDOM(section);
@@ -1187,8 +1385,146 @@
         // App State
         let state = {
             userProfile: 'small',
-            selectedWords: []
+            selectedWords: [],
+            locked: false
         };
+
+        // ===== Section order + lock (localStorage) =====
+        const ORDER_KEY = 'aac_section_order_v1';
+        const LOCK_KEY  = 'aac_locked_v1';
+
+        function loadSectionOrder() {
+            try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; }
+            catch (e) { return []; }
+        }
+        function saveSectionOrder() {
+            const order = Array.from(document.querySelectorAll('main section[data-section-id]'))
+                .map(s => s.dataset.sectionId);
+            try { localStorage.setItem(ORDER_KEY, JSON.stringify(order)); } catch (e) {}
+        }
+        function loadLocked() {
+            try { return localStorage.getItem(LOCK_KEY) === '1'; }
+            catch (e) { return false; }
+        }
+        function saveLocked(v) {
+            try { localStorage.setItem(LOCK_KEY, v ? '1' : '0'); } catch (e) {}
+        }
+
+        const BUILTIN_GRID_TO_ID = {
+            turntakingGrid: 'turntaking',
+            preferencesGrid: 'preferences',
+            instrumentsGrid: 'instruments',
+            rhymesGrid: 'rhymes',
+            modifiersGrid: 'modifiers',
+            needsGrid: 'needs',
+            emotionsGrid: 'emotions',
+            controlGrid: 'control'
+        };
+
+        function tagBuiltInSections() {
+            Object.entries(BUILTIN_GRID_TO_ID).forEach(([gridId, sectionId]) => {
+                const grid = document.getElementById(gridId);
+                if (!grid) return;
+                const section = grid.closest('section');
+                if (section && !section.dataset.sectionId) {
+                    section.dataset.sectionId = sectionId;
+                }
+            });
+        }
+
+        function addDragHandles() {
+            document.querySelectorAll('section[data-section-id]').forEach(section => {
+                const header = section.querySelector(':scope > .category-header');
+                if (!header) return;
+                if (header.querySelector(':scope > .drag-handle')) return;
+                const handle = document.createElement('button');
+                handle.className = 'drag-handle';
+                handle.type = 'button';
+                handle.draggable = true;
+                handle.title = 'Drag to reorder section';
+                handle.setAttribute('aria-label', 'Drag to reorder section');
+                handle.innerHTML =
+                    '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">' +
+                    '<circle cx="9"  cy="6"  r="1.8"/><circle cx="15" cy="6"  r="1.8"/>' +
+                    '<circle cx="9"  cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/>' +
+                    '<circle cx="9"  cy="18" r="1.8"/><circle cx="15" cy="18" r="1.8"/>' +
+                    '</svg>';
+                header.insertBefore(handle, header.firstChild);
+            });
+        }
+
+        function hoistCustomSections() {
+            // Move custom sections out of #customSections into <main> for unified ordering
+            const host = document.getElementById('customSections');
+            if (!host) return;
+            const main = host.parentElement;
+            const anchor = document.getElementById('addSectionBtn');
+            Array.from(host.children).forEach(child => {
+                main.insertBefore(child, anchor);
+            });
+        }
+
+        function applySectionOrder() {
+            const order = loadSectionOrder();
+            if (!order.length) return;
+            const main = document.querySelector('main');
+            const anchor = document.getElementById('addSectionBtn');
+            const all = Array.from(document.querySelectorAll('section[data-section-id]'));
+            const byId = new Map(all.map(s => [s.dataset.sectionId, s]));
+            order.forEach(id => {
+                const s = byId.get(id);
+                if (s) { main.insertBefore(s, anchor); byId.delete(id); }
+            });
+            // Any sections not in the saved order (new ones) stay at the end in their
+            // current relative order.
+        }
+
+        // Drag-and-drop reordering
+        let draggedSection = null;
+        document.addEventListener('dragstart', (e) => {
+            if (state.locked) { e.preventDefault(); return; }
+            const handle = e.target.closest && e.target.closest('.drag-handle');
+            if (!handle) return;
+            const section = handle.closest('section[data-section-id]');
+            if (!section) return;
+            draggedSection = section;
+            section.classList.add('section-dragging');
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                try { e.dataTransfer.setData('text/plain', section.dataset.sectionId); } catch (_) {}
+                try { e.dataTransfer.setDragImage(section, 30, 30); } catch (_) {}
+            }
+        });
+        document.addEventListener('dragover', (e) => {
+            if (!draggedSection) return;
+            const target = e.target.closest && e.target.closest('main section[data-section-id]');
+            if (!target || target === draggedSection) return;
+            e.preventDefault();
+            const rect = target.getBoundingClientRect();
+            const before = (e.clientY - rect.top) < rect.height / 2;
+            const parent = target.parentNode;
+            if (before) parent.insertBefore(draggedSection, target);
+            else parent.insertBefore(draggedSection, target.nextSibling);
+        });
+        document.addEventListener('dragend', () => {
+            if (!draggedSection) return;
+            draggedSection.classList.remove('section-dragging');
+            draggedSection = null;
+            saveSectionOrder();
+        });
+
+        function applyLockUI() {
+            document.body.classList.toggle('locked', !!state.locked);
+            const btn = document.getElementById('lockToggleBtn');
+            if (btn) {
+                btn.classList.toggle('locked', !!state.locked);
+                btn.setAttribute('aria-pressed', state.locked ? 'true' : 'false');
+                const icon = btn.querySelector('.lock-icon');
+                const label = btn.querySelector('.lock-label');
+                if (icon)  icon.textContent  = state.locked ? '🔒' : '🔓';
+                if (label) label.textContent = state.locked ? 'Locked — Tap to unlock' : 'Unlocked — Tap to lock';
+            }
+        }
 
         // Word buttons organized by category
         const wordLibrary = {
@@ -1242,6 +1578,10 @@
             control: [
                 { word: 'Stop', category: 'control' },
                 { word: 'Go', category: 'control' }
+            ],
+            turntaking: [
+                { word: 'My turn', category: 'turntaking' },
+                { word: 'Your turn', category: 'turntaking' }
             ],
             rhymes: [
                 { word: 'Hello Song', category: 'rhymes' },
@@ -1389,6 +1729,7 @@
 
         // Initialize UI
         function initializeUI() {
+            createSection('turntakingGrid', wordLibrary.turntaking, 'turntaking');
             createSection('preferencesGrid', wordLibrary.preferences, 'preferences');
             createSection('instrumentsGrid', wordLibrary.instruments, 'instruments');
             createSection('rhymesGrid', wordLibrary.rhymes, 'rhymes');
@@ -1397,6 +1738,13 @@
             createSection('emotionsGrid', wordLibrary.emotions, 'emotions');
             createSection('controlGrid', wordLibrary.control, 'control');
             renderCustomSections();
+
+            // Wire up section reordering & lock
+            tagBuiltInSections();
+            hoistCustomSections();
+            addDragHandles();
+            applySectionOrder();
+            applyLockUI();
 
             // Update profile buttons
             document.querySelectorAll('.profile-btn').forEach(btn => {
@@ -1481,6 +1829,15 @@
             panel.classList.toggle('hidden');
         });
 
+        // Lock toggle
+        state.locked = loadLocked();
+        document.addEventListener('DOMContentLoaded', applyLockUI);
+        document.getElementById('lockToggleBtn').addEventListener('click', () => {
+            state.locked = !state.locked;
+            saveLocked(state.locked);
+            applyLockUI();
+        });
+
         document.querySelectorAll('.profile-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 state.userProfile = btn.dataset.profile;
@@ -1494,10 +1851,38 @@
             }
         });
 
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            state.selectedWords = [];
+        document.getElementById('backspaceBtn').addEventListener('click', () => {
+            if (state.selectedWords.length === 0) return;
+            state.selectedWords.pop();
             updateSentenceDisplay();
         });
+
+        // Clear: requires a confirmation tap within 2s
+        (() => {
+            const btn = document.getElementById('clearBtn');
+            const toast = document.getElementById('clearToast');
+            let armed = false;
+            let armTimer = null;
+            const disarm = () => {
+                armed = false;
+                btn.classList.remove('arming');
+                toast.classList.remove('visible');
+                if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+            };
+            btn.addEventListener('click', () => {
+                if (state.selectedWords.length === 0) return;
+                if (armed) {
+                    state.selectedWords = [];
+                    updateSentenceDisplay();
+                    disarm();
+                    return;
+                }
+                armed = true;
+                btn.classList.add('arming');
+                toast.classList.add('visible');
+                armTimer = setTimeout(disarm, 2000);
+            });
+        })();
 
         document.getElementById('stopBtn').addEventListener('click', () => {
             window.speechSynthesis.cancel();
